@@ -32,11 +32,15 @@ class Store:
     def search_by_hashtag(self, hashtag: str) -> list:
         matches = [i for i in self._items if hashtag in i.hashtags]
         if not matches:
-            raise errors.ItemNotExistError(f"Item not found with the given hashtag: {hashtag}")
+            print(f"Item not found with the given hashtag: {hashtag}")
+            return []  # Return an empty list instead of raising an error
         return matches
         
 
     def add_item(self, item_name: str):
+        if not item_name.strip():
+            raise errors.ItemNotExistError(f"Item '{item_name}' not found.")
+        
         matches = self.search_by_name(item_name)
         if matches:
             if matches[0] in self._shopping_cart.get_items():
@@ -44,7 +48,7 @@ class Store:
             self._shopping_cart.add_item(matches[0])
         else:
             raise errors.ItemNotExistError(f"Item '{item_name}' not found.")
-    
+                    
     def remove_item(self, item_name: str):
         matches = self.search_by_name(item_name)
         if matches:
@@ -53,9 +57,6 @@ class Store:
             self._shopping_cart.remove_item(matches[0])
         else:
             raise errors.ItemNotExistError(f"Item '{item_name}' not found in the store.")
-
+    
     def checkout(self) -> int:
-        if not self._shopping_cart.get_items():
-            return 0  # Return 0 if the cart is empty
-        total = sum(item.price for item in self._shopping_cart.get_items())
-        return total
+        return self._shopping_cart.get_subtotal()
