@@ -1,7 +1,7 @@
 import yaml
-
 from item import Item
 from shopping_cart import ShoppingCart
+import errors
 
 class Store:
     def __init__(self, path):
@@ -22,16 +22,31 @@ class Store:
         return self._items
 
     def search_by_name(self, item_name: str) -> list:
-        # TODO: Complete
-        pass
+        matches = []
+        for i in self._items:
+            if i.name == item_name:
+                matches.append(i)
+        if not matches:
+            raise errors.ItemNotExistError
+        return matches
+        
 
     def search_by_hashtag(self, hashtag: str) -> list:
-        # TODO: Complete
-        pass
+        matches = []
+        for i in self._items:
+            if hashtag in i.hashtags:  # Check if the hashtag exists in the list of hashtags
+                matches.append(i)
+        if not matches:
+            raise errors.ItemNotExistError
+        return matches
+        
 
     def add_item(self, item_name: str):
-        # TODO: Complete
-        pass
+        matches = self.search_by_name(item_name)
+        if matches:
+            self._shopping_cart.add_item(matches[0])
+        else:
+            raise errors.ItemAlreadyExistsError
 
     def remove_item(self, item_name: str):
         # TODO: Complete
