@@ -1,7 +1,7 @@
 import yaml
 from item import Item
 from shopping_cart import ShoppingCart
-import errors
+from errors import ItemNotExistError, ItemAlreadyExistsError, TooManyMatchesError
 
 class Store:
     def __init__(self, path):
@@ -21,31 +21,30 @@ class Store:
     def get_items(self) -> list:
         return self._items
 
-    def search_by_name(self, item_name: str) -> list:
-        matches = [i for i in self._items if item_name.lower() in i.name.lower()]
-        matches.sort(key=lambda item: item.name)
-        return matches
+    def search_by_name(self, search_phrase: str):
+        filtered_items = [item for item in self._items if search_phrase.lower() in item.name.lower()]
+        return sorted(filtered_items, key=lambda item: item.name)
             
 
-    def search_by_hashtag(self, hashtag: str) -> list:
-        matches = [i for i in self._items if hashtag.lower() in i.hashtags]
-        matches.sort(key=lambda item: item.name)
-        return matches
+    def search_by_hashtag(self, hashtag: str):
+        filtered_items = [item for item in self._items if hashtag.lower() in item.hashtags]
+        return sorted(filtered_items, key=lambda item: item.name)
         
 
-    def add_item(self, item_name: str):
-        item = self.search_by_name(item_name)[0]
-        self._shopping_cart.add_item(item)
+    def add_item(self, item):
+        if not item or len(item.name.split()) < 2:
+            raise TooManyMatchesError(f"Item name '{item.name}' is too generic.")
+        if item in self._items:
+            raise ItemAlreadyExistsError(f"Item '{item.name}' already exists.")
+        self._items.append(item)
                     
-    def remove_item(self, item_name: str):
-        matches = self.search_by_name(item_name)
-        if len(matches) == 0:
-            raise errors.ItemNotExistError(f"Item '{item_name}' not found.")
-        if len(matches) > 1:
-            raise errors.TooManyMatchesError(f"Too many items found for '{item_name}'")
-        if matches[0] not in self._shopping_cart.get_items():
-            raise errors.ItemNotExistError(f"Item '{item_name}' not found in your shopping cart.")
-        self._shopping_cart.remove_item(matches[0])
+    def remove_item(self, item_name):
+        item = next((item for item in self._items if item.name == item_name), None)
+        if not item:
+            raise ItemNotExistError(f"Item '{item_name}' not found in the store.")
+        self._items.remove(item)
+        # Also remove the item from the shopping cart if it's there
+        self._shopping_cart.remove_item(item_name)
     
     def checkout(self) -> int:
         return self._shopping_cart.get_subtotal()
