@@ -22,23 +22,17 @@ class Store:
         return self._items
 
     def search_by_name(self, item_name: str) -> list:
-        matches = []
-        for i in self._items:
-            if i.name == item_name:
-                matches.append(i)
+        matches = [i for i in self._items if i.name == item_name]
         if not matches:
-            print(f"Item '{item_name}' not found.")  # Log the error without raising an exception
-            return []  # Or you can return None if you prefer
+            print(f"Item '{item_name}' not found.")
+            return []  # Return an empty list instead of raising an error
         return matches
         
 
     def search_by_hashtag(self, hashtag: str) -> list:
-        matches = []
-        for i in self._items:
-            if hashtag in i.hashtags:  # Check if the hashtag exists in the list of hashtags
-                matches.append(i)
+        matches = [i for i in self._items if hashtag in i.hashtags]
         if not matches:
-            raise errors.ItemNotExistError("Item not found with the given hashtag")
+            raise errors.ItemNotExistError(f"Item not found with the given hashtag: {hashtag}")
         return matches
         
 
@@ -54,9 +48,11 @@ class Store:
     def remove_item(self, item_name: str):
         matches = self.search_by_name(item_name)
         if matches:
+            if matches[0] not in self._shopping_cart.get_items():
+                raise errors.ItemNotExistError(f"Item '{item_name}' not found in your shopping cart.")
             self._shopping_cart.remove_item(matches[0])
         else:
-            raise errors.ItemNotExistError("Item not found in your shopping cart")
+            raise errors.ItemNotExistError(f"Item '{item_name}' not found in the store.")
 
     def checkout(self) -> int:
         if not self._shopping_cart.get_items():
