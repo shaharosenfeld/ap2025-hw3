@@ -24,19 +24,18 @@ class Store:
     def search_by_name(self, search_phrase: str):
         if not self._items:  # Check for empty cart
             return []
-        filtered_items = [item for item in self._items if search_phrase.lower() in item.name.lower()]
-        return sorted(filtered_items, key=lambda item: item.name)
-            
+        filtered_items = [item for item in self._items if search_phrase in item.name]
+        return sorted(filtered_items, key=lambda item: item.name)      
 
     def search_by_hashtag(self, hashtag: str):
         if not self._items:  # Check for empty cart
             return []
-        matching_items = [item for item in self._items if hashtag.lower() in [h.lower() for h in item.hashtags]]
+        matching_items = [item for item in self._items if hashtag in [h for h in item.hashtags]]
         return sorted(matching_items, key=lambda x: x.name)  # Sort by name lexicographically
 
     def add_item(self, item_name: str):
         #Check if the item exists in the store's inventory
-        matching_items = [item for item in self._items if item_name.lower() in item.name.lower()]
+        matching_items = [item for item in self._items if item_name in item.name]
         if len(matching_items) == 0:
             # No matching item found
             raise ItemNotExistError(f"Item '{item_name}' not found in the store.")     
@@ -55,7 +54,7 @@ class Store:
                     
     def remove_item(self, item_name: str):
         #Find matching items in the shopping cart using substring matching
-        matching_items = [item for item in self._shopping_cart.get_items() if item_name.lower() in item.name.lower()]
+        matching_items = [item for item in self._shopping_cart.get_items() if item_name in item.name]
         if len(matching_items) == 0:
             # No matching item found
             raise ItemNotExistError(f"Item '{item_name}' not found in the shopping cart.")
@@ -65,7 +64,7 @@ class Store:
             raise TooManyMatchesError(f"Too many matches for the substring '{item_name}'.")
         #Remove the matched item from the shopping cart
         item_to_remove = matching_items[0]
-        self._shopping_cart.remove_item(item_to_remove)
+        self._shopping_cart.remove_item(item_to_remove.name)
     
     def checkout(self) -> int:
         return self._shopping_cart.get_subtotal()

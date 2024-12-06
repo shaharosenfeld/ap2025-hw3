@@ -13,8 +13,10 @@ class ShoppingCart:
         self.items.append(item)
 
     def remove_item(self, item_name):
+        if not isinstance(item_name, str):
+            raise ValueError(f"Expected a string for item_name, but got {type(item_name).__name__}")
         # Search for an item by name
-        matching_items = [item for item in self.items if item_name.lower() in item.name.lower()]
+        matching_items = [item for item in self.items if item_name in item.name]
         if len(matching_items) == 0:
             raise ItemNotExistError(f"Item '{item_name}' not found in the shopping cart.")       
         if len(matching_items) > 1:
