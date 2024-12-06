@@ -27,24 +27,41 @@ class Store:
             
 
     def search_by_hashtag(self, hashtag: str):
-        filtered_items = [item for item in self._items if hashtag.lower() in item.hashtags]
-        return sorted(filtered_items, key=lambda item: item.name)
-        
+        matching_items = [item for item in self._items if hashtag.lower() in [h.lower() for h in item.hashtags]]
+        return sorted(matching_items, key=lambda item: item.name)        
 
-    def add_item(self, item):
-        if not item or len(item.name.split()) < 2:
-            raise TooManyMatchesError(f"Item name '{item.name}' is too generic.")
-        if item in self._items:
-            raise ItemAlreadyExistsError(f"Item '{item.name}' already exists.")
-        self._items.append(item)
+    def add_item(self, item_name: str):
+        #Check if the item exists in the store's inventory
+        matching_items = [item for item in self._items if item_name.lower() in item.name.lower()]
+        if len(matching_items) == 0:
+            # No matching item found
+            raise ItemNotExistError(f"Item '{item_name}' not found in the store.")     
+        if len(matching_items) > 1:
+            # More than one match found
+            raise TooManyMatchesError(f"Too many matches for the name '{item_name}'.")
+        # Get the matched item
+        item_to_add = matching_items[0]
+
+        #Check if the item is already in the shopping cart
+        if item_to_add in self._shopping_cart.get_items():
+            raise ItemAlreadyExistsError(f"Item '{item_name}' is already in the shopping cart.")
+
+        #Add the item to the shopping cart
+        self._shopping_cart.add_item(item_to_add)
                     
-    def remove_item(self, item_name):
-        item = next((item for item in self._items if item.name == item_name), None)
-        if not item:
-            raise ItemNotExistError(f"Item '{item_name}' not found in the store.")
-        self._items.remove(item)
-        # Also remove the item from the shopping cart if it's there
-        self._shopping_cart.remove_item(item_name)
+    def remove_item(self, item_name: str):
+        #Find matching items in the shopping cart using substring matching
+        matching_items = [item for item in self._shopping_cart.get_items() if item_name.lower() in item.name.lower()]
+        if len(matching_items) == 0:
+            # No matching item found
+            raise ItemNotExistError(f"Item '{item_name}' not found in the shopping cart.")
+        
+        if len(matching_items) > 1:
+            #More than one match found, raise TooManyMatchesError
+            raise TooManyMatchesError(f"Too many matches for the substring '{item_name}'.")
+        #Remove the matched item from the shopping cart
+        item_to_remove = matching_items[0]
+        self._shopping_cart.remove_item(item_to_remove)
     
     def checkout(self) -> int:
         return self._shopping_cart.get_subtotal()
