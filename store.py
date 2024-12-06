@@ -37,10 +37,10 @@ class Store:
         return count
     
     def _sort_items(self, items):
-        """Sort items based on common hashtags with cart and lexicographical order"""
+        #Sort items based on common hashtags with cart and lexicographical order
         cart_hashtags = self._get_cart_hashtags()
         
-        # Create tuples of (item, common_hashtag_count) for sorting
+        # Create(item, common_hashtag_count)
         items_with_counts = [
             (item, self.count_common_hashtags(item.hashtags, cart_hashtags))
             for item in items
