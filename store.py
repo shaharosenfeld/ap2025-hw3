@@ -27,7 +27,8 @@ class Store:
             if i.name == item_name:
                 matches.append(i)
         if not matches:
-            raise errors.ItemNotExistError
+            print(f"Item '{item_name}' not found.")  # Log the error without raising an exception
+            return []  # Or you can return None if you prefer
         return matches
         
 
@@ -37,7 +38,7 @@ class Store:
             if hashtag in i.hashtags:  # Check if the hashtag exists in the list of hashtags
                 matches.append(i)
         if not matches:
-            raise errors.ItemNotExistError
+            raise errors.ItemNotExistError("Item not found with the given hashtag")
         return matches
         
 
@@ -46,12 +47,14 @@ class Store:
         if matches:
             self._shopping_cart.add_item(matches[0])
         else:
-            raise errors.ItemAlreadyExistsError
+            raise errors.ItemAlreadyExistsError("Item already in shopping cart")
 
     def remove_item(self, item_name: str):
-        # TODO: Complete
-        pass
+        matches = self.search_by_name(item_name)
+        if matches:
+            self._shopping_cart.remove_item(matches[0])
+        else:
+            raise errors.ItemNotExistError("Item not found in your shopping cart")
 
     def checkout(self) -> int:
-        # TODO: Complete
-        pass
+        return self._shopping_cart.get_subtotal()
