@@ -22,13 +22,17 @@ class Store:
         return self._items
 
     def search_by_name(self, search_phrase: str):
+        if not self._items:  # Check for empty cart
+            return []
         filtered_items = [item for item in self._items if search_phrase.lower() in item.name.lower()]
         return sorted(filtered_items, key=lambda item: item.name)
             
 
     def search_by_hashtag(self, hashtag: str):
+        if not self._items:  # Check for empty cart
+            return []
         matching_items = [item for item in self._items if hashtag.lower() in [h.lower() for h in item.hashtags]]
-        return sorted(matching_items, key=lambda item: item.name)        
+        return sorted(matching_items, key=lambda x: x.name)  # Sort by name lexicographically
 
     def add_item(self, item_name: str):
         #Check if the item exists in the store's inventory
