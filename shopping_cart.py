@@ -26,7 +26,7 @@ class ShoppingCart:
 
     def remove_item(self, item_name: str):
         if item_name in self.items:
-            del self.items[str]
+            del self.items[item_name]
         else:
             raise errors.ItemNotExistError
 
