@@ -35,3 +35,6 @@ class ShoppingCart:
         for i in self.items.values():  #we itarate over the values(items) and not over key(item name)
             sum += i.price
         return sum
+    
+    def get_items(self):
+        return self.items
